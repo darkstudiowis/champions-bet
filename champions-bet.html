@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Champions Bet - Casa de Apuestas Virtual</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        primaryDark: '#4A49B7',
+                        background: {
+                            light: '#FFFFFF',
+                            dark: '#181818'
+                        },
+                        card: {
+                            light: '#F5F5F5',
+                            dark: '#262626'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+</head>
+<body class="bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
+    <div class="container mx-auto px-4 pb-20">
+        <!-- Header -->
+        <header class="py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-trophy text-blue-600 dark:text-blue-400 text-3xl mr-2"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold">Champions Bet</h1>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">UEFA Champions League</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="bg-yellow-100 dark:bg-yellow-900 px-3 py-1 rounded-full flex items-center">
+                        <i class="fas fa-coins text-yellow-500 mr-2"></i>
+                        <span id="user-balance" class="font-bold">1000</span>
+                    </div>
+                    <button id="add-money-btn" class="bg-primary text-white px-3 py-1 rounded-full hover:bg-primaryDark transition">
+                        <i class="fas fa-plus mr-1"></i>
+                        <span class="hidden sm:inline">Añadir</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="bg-card-light dark:bg-card-dark rounded-lg shadow mb-6">
+            <ul class="flex overflow-x-auto whitespace-nowrap">
+                <li class="nav-item active" data-section="upcoming">
+                    <a href="#" class="block px-4 py-3 hover:bg-primary hover:text-white dark:hover:text-white font-medium">
+                        <i class="fas fa-calendar-alt mr-2"></i>Próximos
+                    </a>
+                </li>
+                <li class="nav-item" data-section="live">
+                    <a href="#" class="block px-4 py-3 hover:bg-primary hover:text-white dark:hover:text-white font-medium">
+                        <i class="fas fa-bolt mr-2"></i>En Vivo
+                    </a>
+                </li>
+                <li class="nav-item" data-section="results">
+                    <a href="#" class="block px-4 py-3 hover:bg-primary hover:text-white dark:hover:text-white font-medium">
+                        <i class="fas fa-trophy mr-2"></i>Resultados
+                    </a>
+                </li>
+                <li class="nav-item" data-section="my-bets">
+                    <a href="#" class="block px-4 py-3 hover:bg-primary hover:text-white dark:hover:text-white font-medium">
+                        <i class="fas fa-ticket-alt mr-2"></i>Mis Apuestas
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main content -->
+        <main>
+            <!-- Section: Upcoming Matches -->
+            <section id="upcoming-section" class="content-section active">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
+                    <h2 class="text-xl font-bold">Próximos Partidos</h2>
+                    <div id="next-matches-countdown" class="text-sm mt-1 sm:mt-0 font-medium text-red-600 dark:text-red-400"></div>
+                </div>
+                <div id="upcoming-matches" class="space-y-4">
+                    <!-- Matches will be generated here -->
+                </div>
+            </section>
+
+            <!-- Section: Live Matches -->
+            <section id="live-section" class="content-section hidden">
+                <h2 class="text-xl font-bold mb-4">Partidos En Vivo</h2>
+                <div id="live-matches" class="space-y-4">
+                    <!-- Live matches will be displayed here -->
+                </div>
+            </section>
+
+            <!-- Section: Results -->
+            <section id="results-section" class="content-section hidden">
+                <h2 class="text-xl font-bold mb-4">Resultados</h2>
+                <div id="match-results" class="space-y-4">
+                    <!-- Match results will be displayed here -->
+                </div>
+            </section>
+
+            <!-- Section: My Bets -->
+            <section id="my-bets-section" class="content-section hidden">
+                <h2 class="text-xl font-bold mb-4">Mis Apuestas</h2>
+                <div id="my-bets" class="space-y-4">
+                    <!-- User bets will be displayed here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Bet Slip -->
+        <div id="bet-slip" class="fixed bottom-0 left-0 w-full bg-card-light dark:bg-card-dark shadow-lg transform translate-y-full transition-transform duration-300 z-10">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold">Boleto de Apuesta</h3>
+                    <div class="flex items-center">
+                        <button id="clear-slip-btn" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 mr-3">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <button id="close-slip-btn" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="bet-slip-content" class="max-h-60 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700">
+                    <!-- Bet details will be displayed here -->
+                </div>
+                <div class="mt-3 flex items-center justify-between">
+                    <div class="w-1/2 pr-2">
+                        <label for="bet-amount" class="block text-sm mb-1">Monto:</label>
+                        <input type="number" id="bet-amount" class="w-full px-3 py-2 border rounded text-base bg-white dark:bg-gray-700 dark:border-gray-600" min="10" value="50">
+                    </div>
+                    <div class="w-1/2 pl-2">
+                        <div class="flex justify-between">
+                            <span class="text-sm">Cuota total:</span>
+                            <span id="total-odds" class="font-medium">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm">Ganancia potencial:</span>
+                            <span id="potential-win" class="font-bold text-green-600 dark:text-green-400">0</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="place-bet-btn" class="w-full mt-3 bg-primary text-white py-2 rounded-lg hover:bg-primaryDark transition">
+                    Realizar Apuesta
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="fixed top-5 right-5 px-4 py-2 rounded-lg text-white transform translate-x-full transition-transform duration-300 z-20">
+        <span id="notification-message"></span>
+    </div>
+
+    <script>
+        // Check and set dark mode
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Game data - Champions League teams - Expanded to 40 teams to allow for 18 matches (36 teams)
+        const TEAMS = [
+            "Real Madrid", "Barcelona", "Manchester City", "Bayern Munich", "Liverpool",
+            "PSG", "Inter Milan", "Borussia Dortmund", "Atlético Madrid", "Juventus",
+            "Arsenal", "Chelsea", "AC Milan", "RB Leipzig", "Porto",
+            "Napoli", "Benfica", "Ajax", "Tottenham", "Bayer Leverkusen",
+            "Atalanta", "Celtic", "PSV Eindhoven", "Club Brugge", "Lille",
+            "Shakhtar Donetsk", "Red Bull Salzburg", "Sporting CP", "Sevilla", "Monaco",
+            "Dinamo Zagreb", "Olympiacos", "Feyenoord", "Young Boys", "Slavia Prague",
+            "Red Star Belgrade", "Galatasaray", "Rangers", "Copenhagen", "Sturm Graz"
+        ];
+
+        // Champions League only
+        const LEAGUES = ["UEFA Champions League"];
+
+        // Application state (in-memory only, no localStorage)
+        let state = {
+            balance: 1000,
+            upcomingMatches: [],
+            liveMatches: [],
+            finishedMatches: [],
+            userBets: [],
+            selectedBets: [],
+            nextMatchStart: null,
+            simulationStarted: false,
+            nextRoundScheduled: false,
+            usedTeams: [], // Keep track of teams used in the current round
+            schedulerTimerId: null, // Keep track of the scheduler timer
+            nextRoundStatus: 'none' // Status of next round scheduling: 'none', 'waiting', 'countdown'
+        };
+
+        // DOM elements
+        const userBalance = document.getElementById('user-balance');
+        const upcomingMatches = document.getElementById('upcoming-matches');
+        const liveMatches = document.getElementById('live-matches');
+        const matchResults = document.getElementById('match-results');
+        const myBets = document.getElementById('my-bets');
+        const betSlip = document.getElementById('bet-slip');
+        const betSlipContent = document.getElementById('bet-slip-content');
+        const betAmount = document.getElementById('bet-amount');
+        const totalOdds = document.getElementById('total-odds');
+        const potentialWin = document.getElementById('potential-win');
+        const notification = document.getElementById('notification');
+        const nextMatchesCountdown = document.getElementById('next-matches-countdown');
+
+        // Initialize application
+        function initApp() {
+            userBalance.textContent = state.balance;
+            
+            // Generate initial matches
+            generateChampionsMatches();
+            
+            renderUpcomingMatches();
+            renderLiveMatches();
+            renderMatchResults();
+            renderUserBets();
+            
+            // Start countdown for match start
+            startMatchCountdown();
+        }
+
+        // Generate Champions League matches automatically
+        function generateChampionsMatches() {
+            // Clear existing upcoming matches and used teams
+            state.upcomingMatches = [];
+            state.usedTeams = [];
+            
+            // Create a copy of TEAMS array that we can shuffle
+            const availableTeams = [...TEAMS];
+            
+            // Shuffle the teams array (Fisher-Yates algorithm)
+            for (let i = availableTeams.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [availableTeams[i], availableTeams[j]] = [availableTeams[j], availableTeams[i]];
+            }
+            
+            // Generate 18 matches (36 teams) or as many as possible with available teams
+            const numMatches = Math.min(18, Math.floor(availableTeams.length / 2));
+            
+            for (let i = 0; i < numMatches; i++) {
+                // Get two teams for this match (teams at positions 0,1 then 2,3 etc.)
+                const homeTeam = availableTeams[i * 2];
+                const awayTeam = availableTeams[i * 2 + 1];
+                
+                // Add to used teams
+                state.usedTeams.push(homeTeam, awayTeam);
+                
+                // Set match to start in 3 minutes from now
+                const now = new Date();
+                const matchDate = new Date(now.getTime() + (3 * 60 * 1000)); // 3 minutes from now
+                
+                // Set state's next match start time
+                state.nextMatchStart = matchDate;
+                
+                // Calculate realistic odds based on team strength (simplified)
+                // In a real system, this would be based on team rankings, history, etc.
+                const homeTeamStrength = 0.5 + (Math.random() * 0.5); // 0.5 to 1.0
+                const awayTeamStrength = 0.5 + (Math.random() * 0.5); // 0.5 to 1.0
+                
+                // Sum should be around 1 for fair odds
+                const totalStrength = homeTeamStrength + awayTeamStrength;
+                
+                // Probability of each outcome
+                const homeWinProb = homeTeamStrength / totalStrength * 0.7; // Win probabilities reduced to allow for draws
+                const awayWinProb = awayTeamStrength / totalStrength * 0.7;
+                const drawProb = 1 - homeWinProb - awayWinProb;
+                
+                // Convert to fair odds (1/probability, with small margin)
+                const margin = 1.1; // 10% bookmaker margin
+                const homeOdds = (1 / homeWinProb * margin).toFixed(2);
+                const drawOdds = (1 / drawProb * margin).toFixed(2);
+                const awayOdds = (1 / awayWinProb * margin).toFixed(2);
+                
+                const matchId = `match-${Date.now()}-${i}`;
+                
+                state.upcomingMatches.push({
+                    id: matchId,
+                    homeTeam: homeTeam,
+                    awayTeam: awayTeam,
+                    league: LEAGUES[0],
+                    date: matchDate.toISOString(),
+                    odds: {
+                        home: parseFloat(homeOdds),
+                        draw: parseFloat(drawOdds),
+                        away: parseFloat(awayOdds)
+                    },
+                    status: 'upcoming'
+                });
+            }
+            
+            // Update status to countdown
+            state.nextRoundStatus = 'countdown';
+            
+            renderUpcomingMatches();
+            showNotification(`${numMatches} partidos de Champions generados`, 'success');
+        }
+
+        // Start countdown to match start
+        function startMatchCountdown() {
+            if (!state.nextMatchStart) return;
+            
+            const updateCountdown = () => {
+                // Only show countdown if we're in countdown phase
+                if (state.nextRoundStatus !== 'countdown') {
+                    nextMatchesCountdown.textContent = '';
+                    return;
+                }
+                
+                const now = new Date();
+                const matchTime = new Date(state.nextMatchStart);
+                const timeRemaining = matchTime - now;
+                
+                if (timeRemaining <= 0) {
+                    // Time's up, start all matches
+                    nextMatchesCountdown.textContent = '';
+                    startAllMatches();
+                    return;
+                }
+                
+                // Calculate minutes and seconds
+                const minutes = Math.floor(timeRemaining / 60000);
+                const seconds = Math.floor((timeRemaining % 60000) / 1000);
+                
+                // Display countdown
+                nextMatchesCountdown.textContent = `Los partidos comienzan en: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                
+                // Update every second
+                setTimeout(updateCountdown, 1000);
+            };
+            
+            // Start the countdown
+            updateCountdown();
+        }
+
+        // Start all matches simultaneously
+        function startAllMatches() {
+            if (state.upcomingMatches.length === 0) return;
+            
+            // Move all upcoming matches to live
+            state.upcomingMatches.forEach(match => {
+                // Add to live with initial score
+                const liveMatch = {
+                    ...match,
+                    status: 'live',
+                    minute: 1,
+                    score: {
+                        home: 0,
+                        away: 0
+                    },
+                    possession: Math.random() < 0.5 ? 'home' : 'away', // Random initial possession
+                    lastEvent: 'Comienza el partido',
+                    events: [{
+                        minute: 1,
+                        type: 'kickoff',
+                        description: 'Comienza el partido'
+                    }]
+                };
+                
+                state.liveMatches.push(liveMatch);
+            });
+            
+            // Clear upcoming matches
+            state.upcomingMatches = [];
+            
+            // Render updated sections
+            renderUpcomingMatches();
+            renderLiveMatches();
+            
+            // Show notification
+            showNotification('¡Todos los partidos han comenzado!', 'info');
+            
+            // Switch to live section
+            switchSection('live');
+            
+            // Start the live match simulator
+            if (!state.simulationStarted) {
+                startLiveMatchSimulator();
+                state.simulationStarted = true;
+            }
+            
+            // Set status to none (we're in live phase)
+            state.nextRoundStatus = 'none';
+            
+            // Reset next round scheduled flag
+            state.nextRoundScheduled = false;
+        }
+
+        // Schedule next round after all matches finished
+        function scheduleNextRound() {
+            if (state.nextRoundScheduled) return;
+            
+            // Only schedule next round if all matches are finished
+            if (state.liveMatches.length === 0) {
+                state.nextRoundScheduled = true;
+                state.nextRoundStatus = 'waiting';
+                
+                // Update the countdown display to show waiting message
+                nextMatchesCountdown.textContent = 'Próxima ronda en 1 minuto...';
+                
+                // Show notification
+                showNotification('Próxima ronda de partidos en 1 minuto', 'info');
+                
+                // Clear any existing timer
+                if (state.schedulerTimerId) {
+                    clearTimeout(state.schedulerTimerId);
+                }
+                
+                // Schedule next round in 1 minute
+                state.schedulerTimerId = setTimeout(() => {
+                    generateChampionsMatches();
+                    
+                    // Start countdown again
+                    startMatchCountdown();
+                }, 60 * 1000); // 1 minute
+            }
+        }
+
+        // Render upcoming matches
+        function renderUpcomingMatches() {
+            upcomingMatches.innerHTML = '';
+            
+            if (state.upcomingMatches.length === 0) {
+                let message = 'No hay partidos próximos programados.';
+                
+                if (state.nextRoundStatus === 'waiting') {
+                    message = 'Próxima ronda de partidos en preparación...';
+                }
+                
+                upcomingMatches.innerHTML = `
+                    <div class="text-center py-6 bg-card-light dark:bg-card-dark rounded-lg">
+                        <p>${message}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            state.upcomingMatches.forEach(match => {
+                const matchDate = new Date(match.date);
+                const formattedDate = matchDate.toLocaleDateString('es-ES', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                const matchElement = document.createElement('div');
+                matchElement.className = 'bg-card-light dark:bg-card-dark rounded-lg shadow p-4';
+                matchElement.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded-full">${match.league}</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">${formattedDate}</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-center flex-1">
+                            <span class="block font-bold">${match.homeTeam}</span>
+                        </div>
+                        <div class="text-center px-2">
+                            <span class="text-gray-500 dark:text-gray-400">vs</span>
+                        </div>
+                        <div class="text-center flex-1">
+                            <span class="block font-bold">${match.awayTeam}</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button class="bet-option bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded py-2 hover:bg-primary hover:text-white dark:hover:text-white transition" 
+                                data-match-id="${match.id}" 
+                                data-bet-type="home" 
+                                data-team="${match.homeTeam}"
+                                data-odds="${match.odds.home}">
+                            <span class="block">Local</span>
+                            <span class="block font-bold">${match.odds.home}</span>
+                        </button>
+                        <button class="bet-option bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded py-2 hover:bg-primary hover:text-white dark:hover:text-white transition" 
+                                data-match-id="${match.id}" 
+                                data-bet-type="draw" 
+                                data-team="Empate"
+                                data-odds="${match.odds.draw}">
+                            <span class="block">Empate</span>
+                            <span class="block font-bold">${match.odds.draw}</span>
+                        </button>
+                        <button class="bet-option bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded py-2 hover:bg-primary hover:text-white dark:hover:text-white transition" 
+                                data-match-id="${match.id}" 
+                                data-bet-type="away" 
+                                data-team="${match.awayTeam}"
+                                data-odds="${match.odds.away}">
+                            <span class="block">Visitante</span>
+                            <span class="block font-bold">${match.odds.away}</span>
+                        </button>
+                    </div>
+                `;
+                
+                upcomingMatches.appendChild(matchElement);
+            });
+            
+            // Mark already selected bets
+            highlightSelectedBets();
+        }
+
+        // Highlight bet options that are already in the bet slip
+        function highlightSelectedBets() {
+            state.selectedBets.forEach(bet => {
+                const betOption = document.querySelector(`.bet-option[data-match-id="${bet.matchId}"][data-bet-type="${bet.betType}"]`);
+                if (betOption) {
+                    betOption.classList.add('bg-primary', 'text-white');
+                    betOption.classList.remove('bg-white', 'dark:bg-gray-700');
+                }
+            });
+        }
+
+        // Start live match simulator
+        function startLiveMatchSimulator() {
+            // Update matches every few seconds
+            const updateInterval = setInterval(() => {
+                if (state.liveMatches.length === 0) {
+                    clearInterval(updateInterval);
+                    // Schedule next round if all matches finished and not already scheduled
+                    scheduleNextRound();
+                    return;
+                }
+                
+                updateLiveMatches();
+            }, 5000); // Update every 5 seconds
+            
+            // Immediately start simulation
+            updateLiveMatches();
+        }
+
+        // Generate a random match event
+        function generateMatchEvent(match) {
+            const eventTypes = [
+                { type: 'possession', weight: 30, description: (team) => `${team} mantiene la posesión` },
+                { type: 'shot', weight: 20, description: (team) => `¡Disparo de ${team}!` },
+                { type: 'corner', weight: 10, description: (team) => `Córner para ${team}` },
+                { type: 'foul', weight: 15, description: (team) => `Falta cometida por ${team}` },
+                { type: 'save', weight: 10, description: (team, against) => `¡Gran atajada del portero de ${team}!` },
+                { type: 'offside', weight: 5, description: (team) => `Fuera de juego de ${team}` },
+                { type: 'goal', weight: 3, description: (team) => `¡GOOOOL de ${team}!` },
+                { type: 'yellowcard', weight: 5, description: (team) => `Tarjeta amarilla para ${team}` },
+                { type: 'redcard', weight: 1, description: (team) => `¡Tarjeta roja para ${team}!` }
+            ];
+            
+            // Get random event based on weights
+            const totalWeight = eventTypes.reduce((sum, event) => sum + event.weight, 0);
+            let random = Math.random() * totalWeight;
+            let selectedEvent = null;
+            
+            for (const event of eventTypes) {
+                random -= event.weight;
+                if (random <= 0) {
+                    selectedEvent = event;
+                    break;
+                }
+            }
+            
+            // Determine which team the event is for
+            // For most events, use the team with possession
+            let eventTeam = match.possession === 'home' ? 'home' : 'away';
+            
+            // For some events like fouls, sometimes it's the opposing team
+            if (selectedEvent.type === 'foul' || selectedEvent.type === 'save') {
+                if (Math.random() < 0.5) {
+                    eventTeam = eventTeam === 'home' ? 'away' : 'home';
+                }
+            }
+            
+            // Get team names
+            const homeTeam = match.homeTeam;
+            const awayTeam = match.awayTeam;
+            let teamName = eventTeam === 'home' ? homeTeam : awayTeam;
+            const opposingTeam = eventTeam === 'home' ? awayTeam : homeTeam;
+            
+            // Process special events
+            if (selectedEvent.type === 'goal') {
+                // Update score
+                if (eventTeam === 'home') {
+                    match.score.home += 1;
+                } else {
+                    match.score.away += 1;
+                }
+            } else if (selectedEvent.type === 'possession') {
+                // Switch possession sometimes
+                if (Math.random() < 0.3) {
+                    match.possession = match.possession === 'home' ? 'away' : 'home';
+                    teamName = match.possession === 'home' ? homeTeam : awayTeam;
+                }
+            }
+            
+            // Create event object
+            const event = {
+                minute: match.minute,
+                type: selectedEvent.type,
+                team: eventTeam,
+                description: selectedEvent.description(teamName, opposingTeam)
+            };
+            
+            // Add to match events
+            match.events.push(event);
+            match.lastEvent = event.description;
+            
+            return event;
+        }
+
+        // Update live matches
+        function updateLiveMatches() {
+            if (state.liveMatches.length === 0) return;
+            
+            let matchesFinished = false;
+            
+            state.liveMatches.forEach(match => {
+                // Update match minute
+                match.minute += Math.floor(Math.random() * 3) + 1;
+                
+                // Generate match event
+                generateMatchEvent(match);
+                
+                // Check if match is finished (90 minutes)
+                if (match.minute >= 90) {
+                    match.status = 'finished';
+                    match.finishedDate = new Date().toISOString();
+                    matchesFinished = true;
+                    
+                    // Add final whistle event
+                    match.events.push({
+                        minute: 90,
+                        type: 'end',
+                        description: 'Final del partido'
+                    });
+                    
+                    match.lastEvent = 'Final del partido';
+                    
+                    // Move to finished matches
+                    state.finishedMatches.push(match);
+                    
+                    // Update user bets for this match
+                    updateBetsForMatch(match);
+                }
+            });
+            
+            // Remove finished matches from live
+            if (matchesFinished) {
+                state.liveMatches = state.liveMatches.filter(match => match.status !== 'finished');
+                
+                renderLiveMatches();
+                renderMatchResults();
+                renderUserBets();
+                
+                // Schedule next round if all matches finished
+                if (state.liveMatches.length === 0) {
+                    scheduleNextRound();
+                }
+            } else {
+                // Just update the UI if no matches finished
+                renderLiveMatches();
+            }
+        }
+
+        // Render live matches with more detail
+        function renderLiveMatches() {
+            liveMatches.innerHTML = '';
+            
+            if (state.liveMatches.length === 0) {
+                let message = 'No hay partidos en vivo actualmente.';
+                
+                if (state.nextRoundStatus === 'waiting') {
+                    message = 'Los partidos han finalizado. Próxima ronda en preparación...';
+                }
+                
+                liveMatches.innerHTML = `
+                    <div class="text-center py-6 bg-card-light dark:bg-card-dark rounded-lg">
+                        <p>${message}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Group matches into rows of 2 for better display (especially on mobile)
+            const rows = [];
+            for (let i = 0; i < state.liveMatches.length; i += 2) {
+                rows.push(state.liveMatches.slice(i, i + 2));
+            }
+            
+            // Create container for rows
+            const matchesContainer = document.createElement('div');
+            matchesContainer.className = 'space-y-4';
+            
+            // Render each row
+            rows.forEach(row => {
+                const rowElement = document.createElement('div');
+                rowElement.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+                
+                // Render each match in the row
+                row.forEach(match => {
+                    const possessionIndicator = match.possession === 'home' ? 
+                        `<div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-10 bg-green-500 rounded-r-md"></div>` :
+                        `<div class="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-10 bg-green-500 rounded-l-md"></div>`;
+                    
+                    const matchElement = document.createElement('div');
+                    matchElement.className = 'bg-card-light dark:bg-card-dark rounded-lg shadow p-4 relative';
+                    matchElement.innerHTML = `
+                        ${possessionIndicator}
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded-full">${match.league}</span>
+                            <span class="text-xs bg-red-500 text-white px-2 py-1 rounded-full">EN VIVO</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="text-center flex-1">
+                                <span class="block font-bold">${match.homeTeam}</span>
+                                <span class="text-xl font-bold">${match.score.home}</span>
+                            </div>
+                            <div class="text-center px-2">
+                                <span class="text-gray-500 dark:text-gray-400">${match.minute}'</span>
+                            </div>
+                            <div class="text-center flex-1">
+                                <span class="block font-bold">${match.awayTeam}</span>
+                                <span class="text-xl font-bold">${match.score.away}</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                            <div class="text-sm">
+                                <span class="font-medium">${match.minute}' - </span>
+                                <span>${match.lastEvent}</span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button class="view-details-btn text-sm text-primary dark:text-blue-400 hover:underline w-full text-center" data-match-id="${match.id}">
+                                Ver detalles completos
+                            </button>
+                        </div>
+                    `;
+                    
+                    rowElement.appendChild(matchElement);
+                });
+                
+                matchesContainer.appendChild(rowElement);
+            });
+            
+            liveMatches.appendChild(matchesContainer);
+            
+            // Add event listeners for view details buttons
+            document.querySelectorAll('.view-details-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const matchId = e.target.dataset.matchId;
+                    showMatchDetails(matchId);
+                });
+            });
+        }
+
+        // Show match details (events timeline)
+        function showMatchDetails(matchId) {
+            // Find match in live or finished matches
+            const match = state.liveMatches.find(m => m.id === matchId) || 
+                        state.finishedMatches.find(m => m.id === matchId);
+            
+            if (!match) return;
+            
+            // Create modal for match details
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full mx-4 max-h-[80vh] overflow-hidden flex flex-col">
+                    <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                        <h3 class="font-bold text-lg">${match.homeTeam} ${match.score.home} - ${match.score.away} ${match.awayTeam}</h3>
+                        <button class="close-modal text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="p-4 overflow-y-auto flex-grow">
+                        <div class="relative">
+                            <div class="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
+                            <div class="space-y-3">
+                                ${match.events.map(event => {
+                                    let iconClass = 'fas fa-circle text-gray-400';
+                                    
+                                    // Set appropriate icon for event type
+                                    switch(event.type) {
+                                        case 'goal':
+                                            iconClass = 'fas fa-futbol text-red-500';
+                                            break;
+                                        case 'yellowcard':
+                                            iconClass = 'fas fa-square text-yellow-500';
+                                            break;
+                                        case 'redcard':
+                                            iconClass = 'fas fa-square text-red-600';
+                                            break;
+                                        case 'corner':
+                                            iconClass = 'fas fa-flag-checkered text-blue-500';
+                                            break;
+                                        case 'shot':
+                                            iconClass = 'fas fa-bullseye text-purple-500';
+                                            break;
+                                        case 'save':
+                                            iconClass = 'fas fa-hand-paper text-green-500';
+                                            break;
+                                        case 'kickoff':
+                                            iconClass = 'fas fa-play text-green-600';
+                                            break;
+                                        case 'end':
+                                            iconClass = 'fas fa-stop text-red-600';
+                                            break;
+                                    }
+                                    
+                                    return `
+                                    <div class="relative pl-8">
+                                        <div class="absolute left-0 top-1 flex items-center justify-center bg-white dark:bg-gray-800 z-10">
+                                            <i class="${iconClass}"></i>
+                                        </div>
+                                        <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                            <span class="font-medium">${event.minute}' </span>
+                                            <span>${event.description}</span>
+                                        </div>
+                                    </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Prevent body scrolling when modal is open
+            document.body.style.overflow = 'hidden';
+            
+            // Add event listener to close the modal
+            modal.querySelector('.close-modal').addEventListener('click', () => {
+                document.body.removeChild(modal);
+                document.body.style.overflow = '';
+            });
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+
+        // Render match results
+        function renderMatchResults() {
+            matchResults.innerHTML = '';
+            
+            if (state.finishedMatches.length === 0) {
+                matchResults.innerHTML = `
+                    <div class="text-center py-6 bg-card-light dark:bg-card-dark rounded-lg">
+                        <p>No hay resultados disponibles todavía.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort by date descending (most recent first)
+            const sortedMatches = [...state.finishedMatches].sort((a, b) => {
+                return new Date(b.finishedDate) - new Date(a.finishedDate);
+            });
+            
+            // Group matches into rows of 3 for better display
+            const rows = [];
+            for (let i = 0; i < sortedMatches.length; i += 3) {
+                rows.push(sortedMatches.slice(i, i + 3));
+            }
+            
+            // Create container for rows
+            const matchesContainer = document.createElement('div');
+            matchesContainer.className = 'space-y-4';
+            
+            // Render each row
+            rows.forEach(row => {
+                const rowElement = document.createElement('div');
+                rowElement.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
+                
+                // Render each match in the row
+                row.forEach(match => {
+                    const matchDate = new Date(match.finishedDate);
+                    const formattedDate = matchDate.toLocaleDateString('es-ES', { 
+                        weekday: 'short', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+                    
+                    let resultClass = '';
+                    let resultText = '';
+                    
+                    if (match.score.home > match.score.away) {
+                        resultClass = 'text-green-600 dark:text-green-400';
+                        resultText = 'Victoria Local';
+                    } else if (match.score.home < match.score.away) {
+                        resultClass = 'text-blue-600 dark:text-blue-400';
+                        resultText = 'Victoria Visitante';
+                    } else {
+                        resultClass = 'text-amber-600 dark:text-amber-400';
+                        resultText = 'Empate';
+                    }
+                    
+                    const matchElement = document.createElement('div');
+                    matchElement.className = 'bg-card-light dark:bg-card-dark rounded-lg shadow p-4';
+                    matchElement.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded-full">${match.league}</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">${formattedDate}</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-1">
+                            <div class="text-center flex-1">
+                                <span class="block font-bold">${match.homeTeam}</span>
+                                <span class="text-lg font-bold">${match.score.home}</span>
+                            </div>
+                            <div class="text-center px-2">
+                                <span class="text-gray-500 dark:text-gray-400">-</span>
+                            </div>
+                            <div class="text-center flex-1">
+                                <span class="block font-bold">${match.awayTeam}</span>
+                                <span class="text-lg font-bold">${match.score.away}</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-center">
+                            <span class="text-sm ${resultClass} font-medium">${resultText}</span>
+                        </div>
+                        <div class="mt-3">
+                            <button class="view-details-btn text-sm text-primary dark:text-blue-400 hover:underline w-full text-center" data-match-id="${match.id}">
+                                Ver resumen
+                            </button>
+                        </div>
+                    `;
+                    
+                    rowElement.appendChild(matchElement);
+                });
+                
+                matchesContainer.appendChild(rowElement);
+            });
+            
+            matchResults.appendChild(matchesContainer);
+            
+            // Add event listeners for view details buttons
+            document.querySelectorAll('.view-details-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const matchId = e.target.dataset.matchId;
+                    showMatchDetails(matchId);
+                });
+            });
+        }
+
+        // Update bets for finished match
+        function updateBetsForMatch(match) {
+            // Find all pending bets that involve this match
+            const allBets = state.userBets.filter(bet => bet.status === 'pending');
+            
+            // Exit if no bets to update
+            if (allBets.length === 0) return;
+            
+            // Determine the match result
+            let matchResult;
+            if (match.score.home > match.score.away) {
+                matchResult = 'home';
+            } else if (match.score.home < match.score.away) {
+                matchResult = 'away';
+            } else {
+                matchResult = 'draw';
+            }
+            
+            // Update bets - two types: single bets and multiple bets
+            allBets.forEach(bet => {
+                // Handle single bets (for backward compatibility)
+                if (bet.match && bet.match.id === match.id) {
+                    // Update match info in the bet
+                    bet.match = { ...match };
+                    
+                    // Check if bet won
+                    if (bet.betType === matchResult) {
+                        bet.status = 'won';
+                        
+                        // Add winnings to balance
+                        state.balance += bet.potentialWin;
+                        userBalance.textContent = state.balance;
+                        
+                        showNotification(`¡Ganaste ${bet.potentialWin} monedas!`, 'success');
+                    } else {
+                        bet.status = 'lost';
+                    }
+                }
+                // Handle multiple bets
+                else if (bet.selections) {
+                    // Update any selections for this match
+                    const matchSelections = bet.selections.filter(sel => sel.match.id === match.id);
+                    
+                    if (matchSelections.length > 0) {
+                        // Update match info in all selections for this match
+                        matchSelections.forEach(selection => {
+                            selection.match = { ...match };
+                        });
+                        
+                        // Check if any selection for this match lost
+                        const anyLost = matchSelections.some(sel => sel.betType !== matchResult);
+                        
+                        // Check if all selections have results now
+                        const allFinished = bet.selections.every(sel => 
+                            sel.match.status === 'finished' || 
+                            state.finishedMatches.some(m => m.id === sel.match.id)
+                        );
+                        
+                        // If any selection lost, the whole bet is lost
+                        if (anyLost) {
+                            bet.status = 'lost';
+                        } 
+                        // If all selections are finished and none lost, the bet is won
+                        else if (allFinished) {
+                            bet.status = 'won';
+                            
+                            // Add winnings to balance
+                            state.balance += bet.potentialWin;
+                            userBalance.textContent = state.balance;
+                            
+                            showNotification(`¡Ganaste ${bet.potentialWin} monedas con tu apuesta múltiple!`, 'success');
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render user bets
+        function renderUserBets() {
+            myBets.innerHTML = '';
+            
+            if (state.userBets.length === 0) {
+                myBets.innerHTML = `
+                    <div class="text-center py-6 bg-card-light dark:bg-card-dark rounded-lg">
+                        <p>No has realizado ninguna apuesta todavía.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort by date descending (most recent first)
+            const sortedBets = [...state.userBets].sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+            
+            sortedBets.forEach(bet => {
+                const betDate = new Date(bet.date);
+                const formattedDate = betDate.toLocaleDateString('es-ES', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                let statusClass = '';
+                let statusText = '';
+                
+                if (bet.status === 'pending') {
+                    statusClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200';
+                    statusText = 'Pendiente';
+                } else if (bet.status === 'won') {
+                    statusClass = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+                    statusText = 'Ganada';
+                } else if (bet.status === 'lost') {
+                    statusClass = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+                    statusText = 'Perdida';
+                }
+                
+                const betElement = document.createElement('div');
+                betElement.className = 'bg-card-light dark:bg-card-dark rounded-lg shadow p-4';
+                
+                // For multiple bets
+                let betsContent = '';
+                if (bet.selections) {
+                    betsContent = `
+                        <div class="mt-2 space-y-2">
+                            ${bet.selections.map(selection => {
+                                // Determine if this selection won, lost, or is pending
+                                let selectionResult = '';
+                                let selectionClass = '';
+                                
+                                if (selection.match.status === 'finished') {
+                                    const matchResult = getMatchResult(selection.match);
+                                    if (selection.betType === matchResult) {
+                                        selectionResult = '✓';
+                                        selectionClass = 'text-green-500';
+                                    } else {
+                                        selectionResult = '✗';
+                                        selectionClass = 'text-red-500';
+                                    }
+                                }
+                                
+                                return `
+                                <div class="flex justify-between text-sm border-b border-gray-100 dark:border-gray-700 pb-2">
+                                    <div class="flex-1">
+                                        <div>${selection.match.homeTeam} vs ${selection.match.awayTeam}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                            ${getBetTypeText(selection.betType)} @ ${selection.odds}
+                                        </div>
+                                    </div>
+                                    ${selection.match.status === 'finished' ? `
+                                    <div class="text-right">
+                                        <div>${selection.match.score?.home ?? '?'} - ${selection.match.score?.away ?? '?'}</div>
+                                        <div class="text-xs ${selectionClass}">
+                                            ${selectionResult}
+                                        </div>
+                                    </div>
+                                    ` : '<div class="text-xs text-gray-500">Pendiente</div>'}
+                                </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            Cuota total: ${bet.totalOdds}
+                        </div>
+                    `;
+                } else {
+                    // For single bets (backward compatibility)
+                    betsContent = `
+                        <div class="mb-3">
+                            <div class="flex justify-between">
+                                <span class="text-sm">${bet.match.homeTeam} vs ${bet.match.awayTeam}</span>
+                                <span class="text-sm font-medium">${getBetTypeText(bet.betType)} @ ${bet.odds}</span>
+                            </div>
+                            ${bet.match.status === 'finished' ? `
+                            <div class="text-xs mt-1">
+                                Resultado: ${bet.match.score.home} - ${bet.match.score.away}
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+                
+                betElement.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">${formattedDate}</span>
+                        <span class="text-xs px-2 py-1 rounded-full ${statusClass}">${statusText}</span>
+                    </div>
+                    ${betsContent}
+                    <div class="flex justify-between items-center text-sm mt-3">
+                        <div>
+                            <span class="text-gray-600 dark:text-gray-400">Apuesta:</span>
+                            <span class="font-medium">${bet.amount} 🪙</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600 dark:text-gray-400">Potencial:</span>
+                            <span class="font-medium">${bet.potentialWin} 🪙</span>
+                        </div>
+                    </div>
+                    ${bet.status !== 'pending' ? `
+                    <div class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        ${bet.status === 'won' ? `
+                        <div class="mt-1 flex justify-between items-center text-sm">
+                            <span class="text-gray-600 dark:text-gray-400">Ganancia:</span>
+                            <span class="font-medium text-green-600 dark:text-green-400">+${bet.potentialWin} 🪙</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    ` : ''}
+                `;
+                
+                myBets.appendChild(betElement);
+            });
+        }
+
+        // Helper function to get match result
+        function getMatchResult(match) {
+            if (!match.score) return null;
+            
+            if (match.score.home > match.score.away) {
+                return 'home';
+            } else if (match.score.home < match.score.away) {
+                return 'away';
+            } else {
+                return 'draw';
+            }
+        }
+
+        // Helper function to get readable bet type text
+        function getBetTypeText(betType) {
+            switch(betType) {
+                case 'home': return 'Victoria Local';
+                case 'draw': return 'Empate';
+                case 'away': return 'Victoria Visitante';
+                default: return betType;
+            }
+        }
+
+        // Add or update selection in bet slip
+        function addToBetSlip(matchId, betType, teamName, odds) {
+            // Check if a selection for this match already exists
+            const existingIndex = state.selectedBets.findIndex(bet => bet.matchId === matchId);
+            
+            if (existingIndex !== -1) {
+                // If same bet type, remove it (toggle off)
+                if (state.selectedBets[existingIndex].betType === betType) {
+                    state.selectedBets.splice(existingIndex, 1);
+                } else {
+                    // If different bet type, update it
+                    state.selectedBets[existingIndex] = {
+                        matchId,
+                        betType,
+                        teamName,
+                        odds: parseFloat(odds)
+                    };
+                }
+            } else {
+                // Add new selection
+                state.selectedBets.push({
+                    matchId,
+                    betType,
+                    teamName,
+                    odds: parseFloat(odds)
+                });
+            }
+            
+            updateBetSlip();
+        }
+
+        // Update bet slip UI
+        function updateBetSlip() {
+            if (state.selectedBets.length > 0) {
+                // Show bet slip
+                betSlip.classList.remove('translate-y-full');
+                
+                // Populate bet slip
+                renderBetSlipContent();
+            } else {
+                // Hide bet slip if no selections
+                betSlip.classList.add('translate-y-full');
+            }
+            
+            // Re-highlight selected bets
+            document.querySelectorAll('.bet-option').forEach(option => {
+                option.classList.remove('bg-primary', 'text-white');
+                option.classList.add('bg-white', 'dark:bg-gray-700');
+            });
+            
+            highlightSelectedBets();
+        }
+
+        // Render bet slip content
+        function renderBetSlipContent() {
+            betSlipContent.innerHTML = '';
+            
+            state.selectedBets.forEach((bet, index) => {
+                // Find match info
+                const match = state.upcomingMatches.find(m => m.id === bet.matchId);
+                if (!match) return;
+                
+                const betItem = document.createElement('div');
+                betItem.className = 'py-2' + (index > 0 ? ' border-t border-gray-200 dark:border-gray-700' : '');
+                betItem.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-medium text-sm">${match.homeTeam} vs ${match.awayTeam}</h4>
+                            <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                ${getBetTypeText(bet.betType)}: <span class="font-medium">${bet.teamName}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="font-bold text-sm mr-2">${bet.odds}</span>
+                            <button class="remove-bet-btn text-gray-400 hover:text-red-500" data-index="${index}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                betSlipContent.appendChild(betItem);
+            });
+            
+            // Add event listeners for remove buttons
+            document.querySelectorAll('.remove-bet-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.dataset.index);
+                    state.selectedBets.splice(index, 1);
+                    updateBetSlip();
+                });
+            });
+            
+            updatePotentialWin();
+        }
+
+        // Calculate total odds for multiple bets
+        function calculateTotalOdds() {
+            if (state.selectedBets.length === 0) return 0;
+            
+            // Multiply all odds together for accumulator (parlay) bet
+            return state.selectedBets.reduce((total, bet) => total * bet.odds, 1).toFixed(2);
+        }
+
+        // Update potential win based on bet amount and odds
+        function updatePotentialWin() {
+            const amount = parseFloat(betAmount.value);
+            if (isNaN(amount) || amount <= 0 || state.selectedBets.length === 0) {
+                potentialWin.textContent = '0';
+                totalOdds.textContent = '0';
+                return;
+            }
+            
+            const odds = calculateTotalOdds();
+            totalOdds.textContent = odds;
+            
+            const potential = Math.round(amount * odds);
+            potentialWin.textContent = potential;
+        }
+
+        // Place multiple bet
+        function placeMultipleBet() {
+            if (state.selectedBets.length === 0) {
+                showNotification('No has seleccionado ninguna apuesta', 'error');
+                return;
+            }
+            
+            const amount = parseInt(betAmount.value);
+            
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('Ingresa un monto válido', 'error');
+                return;
+            }
+            
+            if (amount > state.balance) {
+                showNotification('No tienes suficientes monedas', 'error');
+                return;
+            }
+            
+            // Get matches for all selections
+            const selections = state.selectedBets.map(bet => {
+                const match = state.upcomingMatches.find(m => m.id === bet.matchId);
+                return {
+                    ...bet,
+                    match: match
+                };
+            });
+            
+            // Deduct from balance
+            state.balance -= amount;
+            userBalance.textContent = state.balance;
+            
+            // Calculate total odds
+            const totalOddsValue = calculateTotalOdds();
+            
+            // Create bet record
+            const bet = {
+                id: `bet-${Date.now()}`,
+                selections: selections,
+                totalOdds: parseFloat(totalOddsValue),
+                amount: amount,
+                potentialWin: Math.round(amount * totalOddsValue),
+                date: new Date().toISOString(),
+                status: 'pending'
+            };
+            
+            // Add to user bets
+            state.userBets.push(bet);
+            
+            // Clear bet slip
+            state.selectedBets = [];
+            updateBetSlip();
+            
+            // Show notification
+            showNotification(`Apuesta múltiple realizada con éxito (${selections.length} selecciones)`, 'success');
+            
+            // Update UI
+            renderUserBets();
+            
+            // Switch to My Bets section
+            switchSection('my-bets');
+        }
+
+        // Add money to balance
+        function addMoney() {
+            const amountToAdd = 1000;
+            state.balance += amountToAdd;
+            userBalance.textContent = state.balance;
+            
+            showNotification(`Se han añadido ${amountToAdd} monedas a tu balance`, 'success');
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notificationElement = document.getElementById('notification');
+            const messageElement = document.getElementById('notification-message');
+            
+            messageElement.textContent = message;
+            
+            // Set notification color based on type
+            if (type === 'success') {
+                notificationElement.className = 'fixed top-5 right-5 px-4 py-2 rounded-lg text-white bg-green-600 transform translate-x-full transition-transform duration-300 z-20';
+            } else if (type === 'error') {
+                notificationElement.className = 'fixed top-5 right-5 px-4 py-2 rounded-lg text-white bg-red-600 transform translate-x-full transition-transform duration-300 z-20';
+            } else {
+                notificationElement.className = 'fixed top-5 right-5 px-4 py-2 rounded-lg text-white bg-blue-600 transform translate-x-full transition-transform duration-300 z-20';
+            }
+            
+            // Show notification
+            setTimeout(() => {
+                notificationElement.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Hide notification after 3 seconds
+            setTimeout(() => {
+                notificationElement.classList.add('translate-x-full');
+            }, 3000);
+        }
+
+        // Switch between sections
+        function switchSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show the selected section
+            document.getElementById(`${sectionId}-section`).classList.remove('hidden');
+            
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            document.querySelector(`.nav-item[data-section="${sectionId}"]`).classList.add('active');
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize app
+            initApp();
+            
+            // Navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = item.dataset.section;
+                    switchSection(section);
+                });
+            });
+            
+            // Add money button
+            document.getElementById('add-money-btn').addEventListener('click', addMoney);
+            
+            // Bet option buttons
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('bet-option') || e.target.parentElement.classList.contains('bet-option')) {
+                    const betOption = e.target.classList.contains('bet-option') ? e.target : e.target.parentElement;
+                    
+                    const matchId = betOption.dataset.matchId;
+                    const betType = betOption.dataset.betType;
+                    const teamName = betOption.dataset.team;
+                    const odds = betOption.dataset.odds;
+                    
+                    addToBetSlip(matchId, betType, teamName, odds);
+                }
+            });
+            
+            // Close bet slip
+            document.getElementById('close-slip-btn').addEventListener('click', () => {
+                betSlip.classList.add('translate-y-full');
+            });
+            
+            // Clear bet slip
+            document.getElementById('clear-slip-btn').addEventListener('click', () => {
+                state.selectedBets = [];
+                updateBetSlip();
+            });
+            
+            // Bet amount input
+            document.getElementById('bet-amount').addEventListener('input', updatePotentialWin);
+            
+            // Place bet button
+            document.getElementById('place-bet-btn').addEventListener('click', placeMultipleBet);
+            
+            // Apply active class styles
+            document.querySelectorAll('.nav-item.active').forEach(item => {
+                const link = item.querySelector('a');
+                link.classList.add('bg-primary', 'text-white');
+            });
+        });
+
+        // Add styles for active navigation
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.nav-item') !== null) {
+                const navItem = e.target.closest('.nav-item');
+                document.querySelectorAll('.nav-item a').forEach(link => {
+                    link.classList.remove('bg-primary', 'text-white');
+                });
+                navItem.querySelector('a').classList.add('bg-primary', 'text-white');
+            }
+        });
+    </script>
+</body>
+</html>
